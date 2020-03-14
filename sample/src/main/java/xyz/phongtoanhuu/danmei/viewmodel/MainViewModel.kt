@@ -1,41 +1,22 @@
 package xyz.phongtoanhuu.danmei.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
-import xyz.phongtoanhuu.danmei.base.BaseViewModel
+import androidx.lifecycle.*
+import xyz.phongtoanhuu.danmei.entity.CategoryEntity
 import xyz.phongtoanhuu.danmei.repository.MainRepository
-import xyz.phongtoanhuu.danmei.utils.AbsentLiveData
-import xyz.phongtoanhuu.danmei.utils.DataState
-import xyz.phongtoanhuu.danmei.utils.Loading
-import xyz.phongtoanhuu.danmei.view.MainStateEvent
-import xyz.phongtoanhuu.danmei.view.MainViewState
+import xyz.phongtoanhuu.danmei.utils.Resource
 
-class MainViewModel (private val mainRepository: MainRepository): BaseViewModel<MainStateEvent, MainViewState>() {
+class MainViewModel(private val mainRepository: MainRepository) :
+    ViewModel() {
 
-    override fun handleStateEvent(stateEvent: MainStateEvent): LiveData<DataState<MainViewState>> {
-        return when (stateEvent) {
-            is MainStateEvent.GetCategories -> {
-                return mainRepository.getCategories()
-            }
-            is MainStateEvent.RestoreCategoriesFromCache -> {
-                return AbsentLiveData.create()
-            }
-            is MainStateEvent.None -> {
-                return liveData {
-                    emit(
-                        DataState(
-                            null,
-                            Loading(false),
-                            null
-                        )
-                    )
-                }
-            }
-        }
+    fun getCategories(): LiveData<Resource<List<CategoryEntity>>> {
+        return mainRepository.getCategories()
     }
 
+    fun getCategoriesCount() : LiveData<Resource<Int>>{
+        return mainRepository.categoriesCount()
+    }
 
-    override fun initNewViewState(): MainViewState {
-        return MainViewState()
+    fun downloadEpub(categoryEntity: CategoryEntity) : LiveData<Resource<CategoryEntity>> {
+        return mainRepository.downloadEpub(categoryEntity)
     }
 }

@@ -11,13 +11,17 @@ import kotlinx.android.parcel.Parcelize
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "id")
-    val id: Int,
+    var id: Int,
     @ColumnInfo(name = "title")
-    val title: String,
+    var title: String,
     @ColumnInfo(name = "description")
-    val description: String,
+    var description: String,
     @ColumnInfo(name = "url")
-    val url: String,
+    var url: String,
     @ColumnInfo(name = "avatar")
-    val avatar: String
+    var avatar: String,
+    @ColumnInfo(name = "last_read_locator")
+    var lastReadLocator:String = "",
+    @ColumnInfo(name = "external_storage_file")
+    var externalStorageFile:String = ""
 ) : Parcelable

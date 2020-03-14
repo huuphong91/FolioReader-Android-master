@@ -8,6 +8,7 @@ import android.util.Log
 fun Application.isConnectedToTheInternet(): Boolean{
     val cm = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     try{
+        Log.e("AppDebug", "isConnectedToTheInternet: ${cm.activeNetworkInfo.isConnected}")
         return cm.activeNetworkInfo.isConnected
     }catch (e: Exception){
         Log.e("AppDebug", "isConnectedToTheInternet: ${e.message}")

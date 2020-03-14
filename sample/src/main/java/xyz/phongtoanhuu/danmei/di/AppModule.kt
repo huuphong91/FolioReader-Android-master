@@ -1,6 +1,8 @@
 package xyz.phongtoanhuu.danmei.di
 
 import androidx.room.Room
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidApplication
@@ -12,7 +14,10 @@ import xyz.phongtoanhuu.danmei.base.BaseApplication
 import xyz.phongtoanhuu.danmei.di.Properties.SERVER
 import xyz.phongtoanhuu.danmei.persistence.AppDatabase
 import xyz.phongtoanhuu.danmei.repository.MainRepository
+import xyz.phongtoanhuu.danmei.utils.AppExecutors
+import xyz.phongtoanhuu.danmei.utils.InterstitialAdUtils
 import xyz.phongtoanhuu.danmei.utils.LiveDataCallAdapterFactory
+import xyz.phongtoanhuu.danmei.utils.SharePreferenceHelper
 import xyz.phongtoanhuu.danmei.viewmodel.MainViewModel
 import java.util.concurrent.TimeUnit
 
@@ -21,6 +26,11 @@ val appModule = module {
     single { createWebService<ServerService>(okHttpClient = get(), url = getProperty(SERVER)) }
     single { provideAppDatabase(application = get()) }
     single { androidApplication() as BaseApplication }
+    single { SharePreferenceHelper(get()) }
+    single { InterstitialAdUtils(get(), get()) }
+    single { InterstitialAd(get()) }
+    single { AdRequest.Builder().build() }
+    single { AppExecutors() }
 }
 
 val fragmentModule = module {
@@ -31,7 +41,7 @@ val viewModelModule = module {
 }
 
 val repositoryModule = module {
-    single { MainRepository(get(), get(), get()) }
+    single { MainRepository(get(), get(), get(), get(), get()) }
 }
 
 object Properties {
