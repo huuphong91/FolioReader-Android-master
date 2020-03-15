@@ -11,12 +11,14 @@ import androidx.annotation.Nullable
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.folioreader.Config
 import com.folioreader.FolioReader
 import com.folioreader.FolioReader.*
 import com.folioreader.model.HighLight
 import com.folioreader.model.HighLight.HighLightAction
 import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.locators.ReadLocator.Companion.fromJson
+import com.folioreader.util.AppUtil
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
 import kotlinx.android.synthetic.main.activity_base.*
@@ -28,15 +30,12 @@ import xyz.phongtoanhuu.danmei.adapter.MainAdapter
 import xyz.phongtoanhuu.danmei.base.BaseActivity
 import xyz.phongtoanhuu.danmei.entity.CategoryEntity
 import xyz.phongtoanhuu.danmei.entity.DownloadEntity
+import xyz.phongtoanhuu.danmei.extension.startActivity
 import xyz.phongtoanhuu.danmei.extension.toast
 import xyz.phongtoanhuu.danmei.utils.InterstitialAdUtils
 import xyz.phongtoanhuu.danmei.utils.Status
 import xyz.phongtoanhuu.danmei.utils.TopSpacingItemDecoration
 import xyz.phongtoanhuu.danmei.viewmodel.MainViewModel
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
 
 class MainActivity : BaseActivity(), OnHighlightListener,
     ReadLocatorListener, OnClosedListener {
@@ -46,12 +45,15 @@ class MainActivity : BaseActivity(), OnHighlightListener,
     private val broadcastReceiver = BroadCastReceiver()
     private lateinit var bManager: LocalBroadcastManager
     private val interstitialAdUtils: InterstitialAdUtils by inject()
+    private var categoryEntity: CategoryEntity? = null
 
     private val viewModel: MainViewModel by viewModel()
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        folioReader = get()
+        folioReader = get().setOnHighlightListener(this)
+            .setReadLocatorListener(this)
+            .setOnClosedListener(this)
         initRecyclerView()
         subscribeObservers()
     }
@@ -76,40 +78,68 @@ class MainActivity : BaseActivity(), OnHighlightListener,
     private fun initRecyclerView() {
         rvMain.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
-            val topSpacingDecorator = TopSpacingItemDecoration(15)
+            val topSpacingDecorator = TopSpacingItemDecoration(0)
             removeItemDecoration(topSpacingDecorator) // does nothing if not applied already
             addItemDecoration(topSpacingDecorator)
-
             mainAdapter = MainAdapter { categoryEntity ->
                 run {
-                    if (categoryEntity.externalStorageFile == "") {
-                        viewModel.downloadEpub(categoryEntity)
-                            .observe(this@MainActivity, Observer { result ->
-                                when (result.status) {
-                                    Status.LOADING -> showProgressBar(visibility = true)
-                                    Status.SUCCESS -> {
-                                        showProgressBar(false)
-                                        interstitialAdUtils.showInterstitialAd(object :
-                                            InterstitialAdUtils.AdCloseListener {
-                                            override fun onAdClosed() {
-                                                result.data?.let {
-                                                    if (it.externalStorageFile != "") {
-                                                        folioReader?.openBook(categoryEntity.externalStorageFile)
+                    if (categoryEntity.isReaded != 0) {
+                        if (categoryEntity.externalStorageFile == "") {
+                            viewModel.downloadEpub(categoryEntity)
+                                .observe(this@MainActivity, Observer { result ->
+                                    when (result.status) {
+                                        Status.LOADING -> showProgressBar(visibility = true)
+                                        Status.SUCCESS -> {
+                                            showProgressBar(false)
+                                            interstitialAdUtils.showInterstitialAd(object :
+                                                InterstitialAdUtils.AdCloseListener {
+                                                override fun onAdClosed() {
+                                                    result.data?.let {
+                                                        this@MainActivity.categoryEntity = it
+                                                        val readLocator = lastReadLocator
+                                                        var config =
+                                                            AppUtil.getSavedConfig(
+                                                                applicationContext
+                                                            )
+                                                        if (config == null) {
+                                                            config = Config()
+                                                        }
+                                                        config!!.allowedDirection =
+                                                            Config.AllowedDirection.VERTICAL_AND_HORIZONTAL;
+                                                        if (it.externalStorageFile != "") {
+                                                            folioReader?.setReadLocator(readLocator)
+                                                                ?.setConfig(config, true)
+                                                                ?.openBook(categoryEntity.externalStorageFile)
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        })
+                                            })
+                                        }
+                                        Status.ERROR -> {
+                                            showProgressBar(false)
+                                            toast("Nếu bị lỗi, vui lòng kiểm tra lại kết nối internet")
+                                        }
                                     }
-                                    Status.ERROR -> {
-                                        showProgressBar(false)
-                                        toast("Nếu bị lỗi, vui lòng kiểm tra lại kết nối internet")
-                                    }
-                                }
-
-                            })
+                                })
+                        } else {
+                            this@MainActivity.categoryEntity = categoryEntity
+                            val readLocator = lastReadLocator
+                            var config = AppUtil.getSavedConfig(applicationContext)
+                            if (config == null) {
+                                config = Config()
+                            }
+                            config!!.allowedDirection =
+                                Config.AllowedDirection.VERTICAL_AND_HORIZONTAL;
+                            folioReader?.setReadLocator(readLocator)
+                                ?.setConfig(config, true)
+                                ?.openBook(categoryEntity.externalStorageFile)
+                        }
                     } else {
-                        folioReader?.openBook(categoryEntity.externalStorageFile)
+                        startActivity<PopupContentActivity> {
+                            this.putExtra("CategoryEntity",categoryEntity)
+                        }
                     }
+
                 }
             }
 
@@ -118,8 +148,8 @@ class MainActivity : BaseActivity(), OnHighlightListener,
     }
 
     private fun subscribeObservers() {
-        viewModel.getCategoriesCount().observe(this, Observer {})
-        viewModel.getCategories().observe(this, Observer {
+        viewModel.getCategoriesCount().observe(this, Observer {  })
+        viewModel.categoryList.observe(this, Observer {
             it.data?.let {
                 mainAdapter.submitList(it as ArrayList<CategoryEntity>)
             }
@@ -128,40 +158,16 @@ class MainActivity : BaseActivity(), OnHighlightListener,
 
     private val lastReadLocator: ReadLocator?
         get() {
-            val jsonString =
-                loadAssetTextAsString("Locators/LastReadLocators/last_read_locator_1.json")
+            val jsonString = categoryEntity?.lastReadLocator
             return fromJson(jsonString)
         }
 
     override fun saveReadLocator(readLocator: ReadLocator) {
-        Log.i(LOG_TAG, "-> saveReadLocator -> " + readLocator.toJson())
-    }//You can do anything on successful saving highlight list
-
-    private fun loadAssetTextAsString(name: String): String? {
-        var `in`: BufferedReader? = null
-        try {
-            val buf = StringBuilder()
-            val `is`: InputStream = assets.open(name)
-            `in` = BufferedReader(InputStreamReader(`is`))
-            var str: String?
-            var isFirst = true
-            while (`in`.readLine().also { str = it } != null) {
-                if (isFirst) isFirst = false else buf.append('\n')
-                buf.append(str)
-            }
-            return buf.toString()
-        } catch (e: IOException) {
-            Log.e("HomeActivity", "Error opening asset $name")
-        } finally {
-            if (`in` != null) {
-                try {
-                    `in`.close()
-                } catch (e: IOException) {
-                    Log.e("HomeActivity", "Error closing asset $name")
-                }
-            }
+        categoryEntity?.lastReadLocator = readLocator.toJson().toString()
+        categoryEntity?.let {
+            viewModel.updateCategoryEntity(it)
         }
-        return null
+        Log.i(LOG_TAG, "-> saveReadLocator -> " + readLocator.toJson())
     }
 
     override fun onDestroy() {

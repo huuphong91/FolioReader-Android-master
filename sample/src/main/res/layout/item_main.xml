@@ -13,7 +13,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="#B9B5B5"
         app:cardCornerRadius="8dp"
         app:cardElevation="6dp"
         app:cardMaxElevation="10dp"
@@ -33,6 +32,8 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
+                app:civ_border_color="@color/black"
+                app:civ_border_width="0.5dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -43,15 +44,28 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="24dp"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:textColor="@color/black"
+                android:textSize="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/imageView"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/imgMain"
-                app:layout_constraintTop_toTopOf="@+id/imgMain"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="dfsdfsdfsdfsfsdf dfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdfdfsdfsdfsdfsfsdf" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

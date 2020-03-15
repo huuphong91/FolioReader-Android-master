@@ -124,6 +124,21 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-reactivestreams-ktx:$versions.lifecycle"
     // ------- Viewmodel + Livedata ------//
 
+    // rxKotlin, rxAndroid, rxBinding
+    implementation "io.reactivex.rxjava2:rxkotlin:$versions.rxKotlinVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-core:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-appcompat:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-drawerlayout:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-leanback:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-recyclerview:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-slidingpanelayout:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-swiperefreshlayout:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-viewpager:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-viewpager2:$versions.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-material:$versions.rxBindingVersion"
+    implementation "io.reactivex.rxjava2:rxandroid:$versions.rxAndroidVersion"
+
     // OkHttp 3
     implementation "com.squareup.okhttp3:okhttp:$versions.okhttp3_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$versions.okhttp3_version"
@@ -140,5 +155,7 @@ dependencies {
             details.useVersion("3.3.2-5309881")
         }
     }
+
+    implementation "com.mlsdev.animatedrv:library:2.0.0"
 
 }

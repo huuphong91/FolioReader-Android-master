@@ -23,5 +23,9 @@ data class CategoryEntity(
     @ColumnInfo(name = "last_read_locator")
     var lastReadLocator:String = "",
     @ColumnInfo(name = "external_storage_file")
-    var externalStorageFile:String = ""
+    var externalStorageFile:String = "",
+    @ColumnInfo(name = "created_at")
+    var create_at: String = "",
+    @ColumnInfo(name = "isReaded")
+    var isReaded: Int = 0
 ) : Parcelable

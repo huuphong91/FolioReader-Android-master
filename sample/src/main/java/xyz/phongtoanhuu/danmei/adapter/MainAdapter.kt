@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import de.hdodenhof.circleimageview.CircleImageView
 import xyz.phongtoanhuu.danmei.R
 import xyz.phongtoanhuu.danmei.entity.CategoryEntity
+import xyz.phongtoanhuu.danmei.utils.DateUtils
 
 class MainAdapter(private val itemClick: (CategoryEntity) -> Unit) :
     RecyclerView.Adapter<MainAdapter.ViewHolder>() {

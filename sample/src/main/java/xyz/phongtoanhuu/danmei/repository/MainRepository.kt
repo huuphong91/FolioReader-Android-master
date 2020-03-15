@@ -2,6 +2,7 @@ package xyz.phongtoanhuu.danmei.repository
 
 import android.content.Context
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.toPublisher
 import okhttp3.ResponseBody
 import xyz.phongtoanhuu.danmei.base.BaseApplication
 import xyz.phongtoanhuu.danmei.di.ServerService
@@ -23,16 +24,38 @@ class MainRepository(
     fun getCategories(): LiveData<Resource<List<CategoryEntity>>> {
         return object :
             NetworkBoundResource<List<CategoryEntity>, List<CategoryResponse>>(appExecutors) {
+
             override fun saveCallResult(item: List<CategoryResponse>) {
-                item.forEach {
-                    val categoryEntity = CategoryEntity(
-                        id = it.id,
-                        avatar = it.avatar,
-                        description = it.description,
-                        title = it.title,
-                        url = it.url
-                    )
-                    appDatabase.serverDao().insertCategory(categoryEntity)
+                val dataDb = appDatabase.serverDao().getCategoriesNormal()
+                if (dataDb.count() > item.count()) {
+                    val dataDbArray = dataDb as ArrayList
+                    item.forEach {
+                        val categoryEntity = CategoryEntity(
+                            id = it.id,
+                            avatar = "$BASE_URL${it.avatar}",
+                            description = it.description,
+                            title = it.title,
+                            url = "$BASE_URL${it.url}",
+                            create_at = it.created_at
+                        )
+                        dataDbArray.remove(categoryEntity)
+                    }
+                    dataDbArray.count()
+                    dataDbArray.forEach {
+                        appDatabase.serverDao().deleteCategoryEntityIsNotReaded(it.id)
+                    }
+                } else {
+                    item.forEach {
+                        val categoryEntity = CategoryEntity(
+                            id = it.id,
+                            avatar = "$BASE_URL${it.avatar}",
+                            description = it.description,
+                            title = it.title,
+                            url = "$BASE_URL${it.url}",
+                            create_at = it.created_at
+                        )
+                        appDatabase.serverDao().insertCategory(categoryEntity)
+                    }
                 }
             }
 
@@ -60,7 +83,7 @@ class MainRepository(
                 }
                 val file = File(application.filesDir, fileName)
                 categoryEntity.externalStorageFile = file.absolutePath
-                appDatabase.serverDao().updateCategoryEntity(categoryEntity)
+                updateCategory(categoryEntity)
             }
 
             override fun shouldFetch(data: CategoryEntity?): Boolean {
@@ -95,5 +118,11 @@ class MainRepository(
                 return serverService.getCategoriesCount()
             }
         }.asLiveData()
+    }
+
+    fun updateCategory(categoryEntity: CategoryEntity) {
+        appExecutors.diskIO().execute {
+            appDatabase.serverDao().updateCategoryEntity(categoryEntity)
+        }
     }
 }

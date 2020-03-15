@@ -23,4 +23,8 @@ class CategoryResponse {
     @SerializedName("avatar_url")
     @Expose
     val avatar: String = ""
+
+    @SerializedName("created_at")
+    @Expose
+    val created_at: String = ""
 }

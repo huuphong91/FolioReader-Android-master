@@ -647,7 +647,7 @@ class FolioPageFragment : Fragment(),
         mScrollSeekbar!!.progressDrawable
             .setColorFilter(
                 resources
-                    .getColor(R.color.default_theme_accent_color),
+                    .getColor(R.color.red),
                 PorterDuff.Mode.SRC_IN
             )
     }
