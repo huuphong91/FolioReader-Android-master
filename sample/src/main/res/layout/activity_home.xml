@@ -10,7 +10,7 @@
         android:id="@+id/rvMain"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#B9B5B5"
+        android:background="#D4D7DC"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,7 +20,7 @@
         android:id="@+id/constraintLayout"
         android:layout_width="0dp"
         android:layout_height="80dp"
-        android:background="#F10404"
+        android:background="#9D70FE"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">

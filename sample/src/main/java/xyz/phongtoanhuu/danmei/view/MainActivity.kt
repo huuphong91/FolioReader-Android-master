@@ -1,14 +1,12 @@
 package xyz.phongtoanhuu.danmei.view
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.annotation.Nullable
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,11 +20,6 @@ import com.folioreader.model.locators.ReadLocator.Companion.fromJson
 import com.folioreader.util.AppUtil
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
-import com.jakewharton.rxbinding3.recyclerview.dataChanges
-import io.reactivex.Observable
-import io.reactivex.Single
-import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
-import jp.wasabeef.recyclerview.animators.FadeInAnimator
 import kotlinx.android.synthetic.main.activity_base.*
 import kotlinx.android.synthetic.main.activity_home.*
 import org.koin.android.ext.android.inject
@@ -42,7 +35,6 @@ import xyz.phongtoanhuu.danmei.utils.InterstitialAdUtils
 import xyz.phongtoanhuu.danmei.utils.Status
 import xyz.phongtoanhuu.danmei.utils.TopSpacingItemDecoration
 import xyz.phongtoanhuu.danmei.viewmodel.MainViewModel
-import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity(), OnHighlightListener,
     ReadLocatorListener, OnClosedListener {
@@ -53,11 +45,13 @@ class MainActivity : BaseActivity(), OnHighlightListener,
     private lateinit var bManager: LocalBroadcastManager
     private val interstitialAdUtils: InterstitialAdUtils by inject()
     private var categoryEntity: CategoryEntity? = null
+    private var kExit = 0
 
     private val viewModel: MainViewModel by viewModel()
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+        kExit = 1
         folioReader = get().setOnHighlightListener(this)
             .setReadLocatorListener(this)
             .setOnClosedListener(this)
@@ -143,23 +137,18 @@ class MainActivity : BaseActivity(), OnHighlightListener,
                         }
                     } else {
                         startActivity<PopupContentActivity> {
-                            this.putExtra("CategoryEntity",categoryEntity)
+                            this.putExtra("CategoryEntity", categoryEntity)
                         }
                     }
 
                 }
             }
-            itemAnimator = FadeInAnimator()
-            adapter = AlphaInAnimationAdapter(mainAdapter).apply {
-                setFirstOnly(true)
-                setDuration(500)
-                setInterpolator(OvershootInterpolator(.5f))
-            }
+            adapter = mainAdapter
         }
     }
 
     private fun subscribeObservers() {
-        viewModel.getCategoriesCount().observe(this, Observer {  })
+        viewModel.getCategoriesCount().observe(this, Observer { })
         viewModel.categoryList.observe(this, Observer {
             it.data?.let {
                 mainAdapter.submitList(it as ArrayList<CategoryEntity>)
@@ -193,6 +182,48 @@ class MainActivity : BaseActivity(), OnHighlightListener,
             "Đã đánh dấu",
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    override fun onBackPressed() {
+        if (kExit == 1) {
+            kExit = 2
+            exit()
+            return
+        }
+        onDestroy()
+        System.runFinalizersOnExit(true)
+        System.exit(0)
+    }
+
+    private fun exit() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Đam Mỹ Tình")
+        builder.setIcon(R.mipmap.ic_launcher)
+        builder.setMessage(" Đam mỹ tình cám ơn bạn đã quan tâm và đọc truyện từ ứng dụng của chúng tôi. Mong các bạn rate 5 sao để đội ngũ biên soạn chúng tôi có động lực tìm kiếm thêm truyện mới. Chúc bạn đọc truyện vui vẻ!")
+        builder.setCancelable(true)
+        builder.setPositiveButton("Đánh giá App") { dialog, _ ->
+            run {
+                dialog.cancel()
+                try {
+                    val uriRate = Uri.parse("market://details?id=$packageName")
+                    val intentRate = Intent(Intent.ACTION_VIEW, uriRate)
+                    startActivity(intentRate)
+                } catch (e: ActivityNotFoundException) {
+                    toast("Ứng dụng Google Play không được cài đặt trên máy")
+                }
+                onDestroy()
+                System.runFinalizersOnExit(true)
+                System.exit(0)
+            }
+        }
+        builder.setNegativeButton("Thoát") { dialog, _ ->
+            run {
+                onDestroy()
+                System.runFinalizersOnExit(true)
+                System.exit(0)
+            }
+        }
+        builder.create().show()
     }
 
     override fun onFolioReaderClosed() {

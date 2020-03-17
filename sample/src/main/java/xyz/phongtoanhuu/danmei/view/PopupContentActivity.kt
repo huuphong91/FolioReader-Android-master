@@ -3,9 +3,8 @@ package xyz.phongtoanhuu.danmei.view
 import android.os.Bundle
 import android.text.Html
 import android.text.method.ScrollingMovementMethod
-import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Gravity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.folioreader.Config
 import com.folioreader.FolioReader
@@ -41,20 +40,24 @@ class PopupContentActivity : BaseActivity(), OnHighlightListener,
             .setReadLocatorListener(this)
             .setOnClosedListener(this)
 
-        val dm = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(dm)
+//        val dm = DisplayMetrics()
+//        windowManager.defaultDisplay.getMetrics(dm)
+//
+//        val width = dm.widthPixels
+//        val height = dm.heightPixels
+//
+//        window.setLayout((width * 0.8).toInt(), (height * 0.7).toInt())
+//
+//        val params = window.attributes
+//        params.gravity = Gravity.CENTER
+//        params.x = 0
+//        params.y = -20
+//
+//        window.attributes = params
 
-        val width = dm.widthPixels
-        val height = dm.heightPixels
-
-        window.setLayout((width * 0.8).toInt(), (height * 0.7).toInt())
-
-        val params = window.attributes
-        params.gravity = Gravity.CENTER
-        params.x = 0
-        params.y = -20
-
-        window.attributes = params
+        imageView2.setOnClickListener {
+            finish()
+        }
 
         categoryEntity = intent.getParcelableExtra("CategoryEntity")
 
@@ -62,7 +65,32 @@ class PopupContentActivity : BaseActivity(), OnHighlightListener,
         tvContent.text = (Html.fromHtml(categoryEntity?.description))
 
         btnRead.setOnClickListener {
-            showProgressBar(true)
+            interstitialAdUtils.showInterstitialAd(object :
+                InterstitialAdUtils.AdCloseListener {
+                override fun onAdClosed() {
+                    btnRead.isEnabled = false
+                    val readLocator = lastReadLocator
+                    var config =
+                        AppUtil.getSavedConfig(
+                            applicationContext
+                        )
+                    if (config == null) {
+                        config = Config()
+                    }
+                    config.allowedDirection =
+                        Config.AllowedDirection.VERTICAL_AND_HORIZONTAL;
+                    if (categoryEntity!!.externalStorageFile != "") {
+                        folioReader
+                            ?.setReadLocator(readLocator)
+                            ?.setConfig(config, true)
+                            ?.openBook(categoryEntity!!.externalStorageFile)
+                    }
+
+                }
+            })
+        }
+
+        button2.setOnClickListener {
             categoryEntity!!.isReaded = 1
             viewModel.updateCategoryEntity(categoryEntity!!)
             if (categoryEntity?.externalStorageFile == "") {
@@ -71,30 +99,16 @@ class PopupContentActivity : BaseActivity(), OnHighlightListener,
                         when (result.status) {
                             Status.LOADING -> showProgressBar(visibility = true)
                             Status.SUCCESS -> {
+                                result.data?.let {
+                                    categoryEntity = it
+                                }
                                 showProgressBar(false)
-                                interstitialAdUtils.showInterstitialAd(object :
-                                    InterstitialAdUtils.AdCloseListener {
-                                    override fun onAdClosed() {
-                                        result.data?.let {
-                                            this@PopupContentActivity.categoryEntity = it
-                                            val readLocator = lastReadLocator
-                                            var config =
-                                                AppUtil.getSavedConfig(
-                                                    applicationContext
-                                                )
-                                            if (config == null) {
-                                                config = Config()
-                                            }
-                                            config!!.allowedDirection =
-                                                Config.AllowedDirection.VERTICAL_AND_HORIZONTAL;
-                                            if (it.externalStorageFile != "") {
-                                                folioReader
-                                                    ?.setReadLocator(readLocator)?.setConfig(config, true)
-                                                    ?.openBook(categoryEntity!!.externalStorageFile)
-                                            }
-                                        }
-                                    }
-                                })
+                                button2.background =
+                                    ContextCompat.getDrawable(this, R.color.app_gray)
+                                button2.isEnabled = false
+                                btnRead.background =
+                                    ContextCompat.getDrawable(this, R.drawable.custom_button)
+                                btnRead.isEnabled = true
                             }
                             Status.ERROR -> {
                                 showProgressBar(false)

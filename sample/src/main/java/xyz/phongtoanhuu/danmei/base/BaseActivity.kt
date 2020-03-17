@@ -1,8 +1,8 @@
 package xyz.phongtoanhuu.danmei.base
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -25,7 +25,17 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     protected fun showProgressBar(visibility: Boolean) {
-        progressBar.visibility = if (visibility) View.VISIBLE else View.INVISIBLE
+        if (visibility) {
+            progressBar.visibility = View.VISIBLE
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            )
+        } else {
+            progressBar.visibility = View.INVISIBLE
+            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        }
+
     }
 
 //    override fun isStoragePermissionGranted(): Boolean {

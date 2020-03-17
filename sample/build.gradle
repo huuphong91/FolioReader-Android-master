@@ -155,8 +155,4 @@ dependencies {
             details.useVersion("3.3.2-5309881")
         }
     }
-
-    implementation "com.mlsdev.animatedrv:library:2.0.0"
-    implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
-
 }
