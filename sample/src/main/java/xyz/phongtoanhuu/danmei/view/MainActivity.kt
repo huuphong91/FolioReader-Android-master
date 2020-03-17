@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
+import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.lifecycle.Observer
@@ -21,6 +22,11 @@ import com.folioreader.model.locators.ReadLocator.Companion.fromJson
 import com.folioreader.util.AppUtil
 import com.folioreader.util.OnHighlightListener
 import com.folioreader.util.ReadLocatorListener
+import com.jakewharton.rxbinding3.recyclerview.dataChanges
+import io.reactivex.Observable
+import io.reactivex.Single
+import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter
+import jp.wasabeef.recyclerview.animators.FadeInAnimator
 import kotlinx.android.synthetic.main.activity_base.*
 import kotlinx.android.synthetic.main.activity_home.*
 import org.koin.android.ext.android.inject
@@ -36,6 +42,7 @@ import xyz.phongtoanhuu.danmei.utils.InterstitialAdUtils
 import xyz.phongtoanhuu.danmei.utils.Status
 import xyz.phongtoanhuu.danmei.utils.TopSpacingItemDecoration
 import xyz.phongtoanhuu.danmei.viewmodel.MainViewModel
+import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity(), OnHighlightListener,
     ReadLocatorListener, OnClosedListener {
@@ -142,8 +149,12 @@ class MainActivity : BaseActivity(), OnHighlightListener,
 
                 }
             }
-
-            adapter = mainAdapter
+            itemAnimator = FadeInAnimator()
+            adapter = AlphaInAnimationAdapter(mainAdapter).apply {
+                setFirstOnly(true)
+                setDuration(500)
+                setInterpolator(OvershootInterpolator(.5f))
+            }
         }
     }
 
