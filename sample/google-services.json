@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "610315005937",
+    "firebase_url": "https://truyendammyfull.firebaseio.com",
+    "project_id": "truyendammyfull",
+    "storage_bucket": "truyendammyfull.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:610315005937:android:4ee8e6a217f1a2c8b7de50",
+        "android_client_info": {
+          "package_name": "com.loiphong.truyendammyfull"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "610315005937-m33vj9ng63bi3pnbhk0q6fos2uv9kp31.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkK4utC3zzXc4lnY_oqX4cS6Pvr83mO7Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "610315005937-m33vj9ng63bi3pnbhk0q6fos2uv9kp31.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
