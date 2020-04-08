@@ -12,7 +12,7 @@ android {
     compileSdkVersion versions.androidCompileSdk
 
     defaultConfig {
-        applicationId "xyz.phongtoanhuu.danmei"
+        applicationId "com.loiphong.truyendammyfull"
         minSdkVersion versions.androidMinSdk
         targetSdkVersion versions.androidTargetSdk
         versionCode versions.projectVersionCode
